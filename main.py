@@ -26,7 +26,7 @@ os.makedirs(LOG_FILE_PATH, exist_ok=True)
 # -----------------------------------------------------------
 # Global flags to enable/disable features (New additions)
 # -----------------------------------------------------------
-ENABLE_TIMING = True  # Set to False to disable timing of endpoints
+ENABLE_TIMING = False  # Set to False to disable timing of endpoints
 ENABLE_AUDIO_ENDPOINTS = True  # Set to False to disable audio endpoints
 ENABLE_IMAGE_ENDPOINTS = False  # Set to False to disable image endpoints
 ENABLE_TTS_ENDPOINTS = True    # Set to False to disable TTS endpoints
