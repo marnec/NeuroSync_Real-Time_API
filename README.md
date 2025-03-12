@@ -1,7 +1,9 @@
 # NeuroSync_Real-Time_API
 A collection of AI model endpoints you can run locally for a real-time audio2face system.
 
-*Used with [The Player](https://github.com/AnimaVR/NeuroSync_Player), you can send real-time facial blendshape animations to Unreal Engine via LiveLink from audio or text inputs, locally.*
+*Used with [The Player](https://github.com/AnimaVR/NeuroSync_Player), NeuroSync real-time api creates facial blendshape animations that are sent to Unreal Engine via LiveLink from audio or text inputs, locally.*
+
+It also provides extra endpoints for modular AI model integrations - expand your AI's capabilities with embeddings, image to text vision models and audio to text from whisper.
 
 You will need to download the models from huggingface and put them in the correct folders (kokoro installs automatically, dont worry about that one - just do the correct pip install first : pip install -q kokoro>=0.8.2 soundfile )
 
