@@ -4,7 +4,10 @@ from flask import Flask, request, jsonify, Response
 from datetime import datetime
 import json
 import traceback
-import time  
+import time  # For timing endpoints
+import warnings
+warnings.simplefilter("ignore")
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # choose which GPU to use, 0 is main.
 
 import torch
@@ -32,6 +35,17 @@ def log_event(event_type, status, details=None):
     with open(log_file, "a") as file:
         file.write(json.dumps(log_entry) + "\n")
 
+# Decorator to time endpoint functions
+def time_endpoint(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        elapsed_time = time.time() - start_time
+        print(f"Time taken for {func.__name__}: {elapsed_time:.2f} seconds")
+        return result
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 torch_dtype_audio = torch.bfloat16 if torch.cuda.is_available() else torch.float32
 torch_dtype_image = torch.float16 if torch.cuda.is_available() else torch.float32
@@ -55,13 +69,13 @@ vilt_processor = image_models["vilt_processor"]
 vilt_model = image_models["vilt_model"]
 
 # NEW: Load the TTS model (e.g. Kokoro) using its dedicated function
-tts_models = load_tts_model()
-# tts_models is a dict with keys "tts_pipeline" and "tts_lock"
+tts_models = load_tts_model()  # tts_models is a dict with keys "tts_pipeline" and "tts_lock"
 
 # ------------------- Audio API (Port 6969) -------------------
 app_audio = Flask("audio_app")
 
 @app_audio.route("/transcribe", methods=["POST"])
+@time_endpoint
 def transcribe_audio():
     try:
         audio_base64 = request.json.get('audio_base64')
@@ -79,6 +93,7 @@ def transcribe_audio():
         return jsonify({"status": "error", "message": err_msg}), 500
 
 @app_audio.route('/audio_to_blendshapes', methods=['POST'])
+@time_endpoint
 def audio_to_blendshapes_route():
     try:
         audio_bytes = request.data
@@ -96,11 +111,11 @@ def audio_to_blendshapes_route():
         log_event("blendshapes", "failure", err_msg)
         return jsonify({"status": "error", "message": err_msg}), 500
 
-
 # ------------------- Image API (Port 1234) -------------------
 app_image = Flask("image_app")
 
 @app_image.route("/process_image", methods=["POST"])
+@time_endpoint
 def route_process_image():
     try:
         data = request.data.decode("utf-8")
@@ -110,6 +125,7 @@ def route_process_image():
         return jsonify({"error": str(e)}), 400
 
 @app_image.route("/process_clip", methods=["POST"])
+@time_endpoint
 def route_process_clip():
     try:
         data = request.data.decode("utf-8")
@@ -119,6 +135,7 @@ def route_process_clip():
         return jsonify({"error": str(e)}), 400
 
 @app_image.route("/process_pdf_imagery", methods=["POST"])
+@time_endpoint
 def route_process_pdf_imagery():
     try:
         data = request.data.decode("utf-8")
@@ -131,25 +148,22 @@ def route_process_pdf_imagery():
 app_tts = Flask("tts_app")
 
 @app_tts.route('/generate_speech', methods=['POST'])
+@time_endpoint
 def generate_speech_tts_endpoint():
     """
     Endpoint for generating speech using the TTS engine.
     """
     text = request.json.get('text', '')
-    # UPDATED: Pass the loaded TTS pipeline and lock to the utility function
     result = generate_speech_segment_tts(text, tts_models["tts_pipeline"], tts_models["tts_lock"])
     if result is None:
         print("TTS engine failed to generate audio.")
         return jsonify({"error": "Failed to generate audio with TTS engine"}), 500
     else:
         return result, 200, {'Content-Type': 'audio/wav'}
-    
-
-
 
 @app_tts.route("/synthesize_and_blendshapes", methods=["POST"])
+@time_endpoint
 def synthesize_and_blendshapes():
-    start_time = time.time()  # Record start time
     try:
         data = request.json
         text = data.get("text", "").strip()
@@ -157,7 +171,6 @@ def synthesize_and_blendshapes():
             log_event("synthesize_and_blendshapes", "failure", "No text data provided.")
             return jsonify({"status": "error", "message": "No text data provided."}), 400
 
-        # Pass TTS model parameters to generate_speech_segment_tts
         audio_bytes = generate_speech_segment_tts(text, tts_models["tts_pipeline"], tts_models["tts_lock"])
         if audio_bytes is None:
             log_event("synthesize_and_blendshapes", "failure", "Failed to generate speech with TTS engine.")
@@ -187,23 +200,18 @@ def synthesize_and_blendshapes():
         response = Response(multipart_body, status=200)
         response.headers["Content-Type"] = f"multipart/mixed; boundary={boundary}"
         log_event("synthesize_and_blendshapes", "success", "Speech and blendshapes generated successfully.")
-
-        # Calculate and print elapsed time
-        elapsed_time = time.time() - start_time
-        print(f"Time taken for synthesize_and_blendshapes: {elapsed_time:.2f} seconds")
-        
         return response
     except Exception as e:
         err_msg = str(e)
         log_event("synthesize_and_blendshapes", "failure", err_msg)
         return jsonify({"status": "error", "message": err_msg}), 500
 
-
 # ------------------- Embedding API (Port 7070) -------------------
 app_embedding = Flask("embedding_app")
 
 @app_embedding.route('/get_embedding', methods=['POST'])
-def get_embedding_embedding():
+@time_endpoint
+def get_embedding():
     try:
         data = request.json
         if not data or 'text' not in data:
