@@ -96,21 +96,6 @@ def audio_to_blendshapes_route():
         log_event("blendshapes", "failure", err_msg)
         return jsonify({"status": "error", "message": err_msg}), 500
 
-@app_audio.route('/get_embedding', methods=['POST'])
-def get_embedding():
-    try:
-        data = request.json
-        if not data or 'text' not in data:
-            log_event("embedding", "failure", "No text data provided.")
-            return jsonify({"status": "error", "message": "No text data provided."}), 400
-        text = data['text']
-        result = process_embedding(text, embmodel)
-        log_event("embedding", "success", f"Generated embedding for text: {text}")
-        return jsonify(result)
-    except Exception as e:
-        err_msg = str(e)
-        log_event("embedding", "failure", err_msg)
-        return jsonify({"status": "error", "message": err_msg}), 500
 
 # ------------------- Image API (Port 1234) -------------------
 app_image = Flask("image_app")
