@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, Response
 from datetime import datetime
 import json
 import traceback
-
+import time  
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # choose which GPU to use, 0 is main.
 
 import torch
@@ -158,9 +158,13 @@ def generate_speech_tts_endpoint():
         return jsonify({"error": "Failed to generate audio with TTS engine"}), 500
     else:
         return result, 200, {'Content-Type': 'audio/wav'}
+    
+
+
 
 @app_tts.route("/synthesize_and_blendshapes", methods=["POST"])
 def synthesize_and_blendshapes():
+    start_time = time.time()  # Record start time
     try:
         data = request.json
         text = data.get("text", "").strip()
@@ -168,7 +172,7 @@ def synthesize_and_blendshapes():
             log_event("synthesize_and_blendshapes", "failure", "No text data provided.")
             return jsonify({"status": "error", "message": "No text data provided."}), 400
 
-        # UPDATED: Pass TTS model parameters to generate_speech_segment_tts
+        # Pass TTS model parameters to generate_speech_segment_tts
         audio_bytes = generate_speech_segment_tts(text, tts_models["tts_pipeline"], tts_models["tts_lock"])
         if audio_bytes is None:
             log_event("synthesize_and_blendshapes", "failure", "Failed to generate speech with TTS engine.")
@@ -198,11 +202,17 @@ def synthesize_and_blendshapes():
         response = Response(multipart_body, status=200)
         response.headers["Content-Type"] = f"multipart/mixed; boundary={boundary}"
         log_event("synthesize_and_blendshapes", "success", "Speech and blendshapes generated successfully.")
+
+        # Calculate and print elapsed time
+        elapsed_time = time.time() - start_time
+        print(f"Time taken for synthesize_and_blendshapes: {elapsed_time:.2f} seconds")
+        
         return response
     except Exception as e:
         err_msg = str(e)
         log_event("synthesize_and_blendshapes", "failure", err_msg)
         return jsonify({"status": "error", "message": err_msg}), 500
+
 
 # ------------------- Embedding API (Port 7070) -------------------
 app_embedding = Flask("embedding_app")
