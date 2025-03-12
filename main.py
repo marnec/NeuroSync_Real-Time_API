@@ -28,9 +28,9 @@ os.makedirs(LOG_FILE_PATH, exist_ok=True)
 # -----------------------------------------------------------
 ENABLE_TIMING = True  # Set to False to disable timing of endpoints
 ENABLE_AUDIO_ENDPOINTS = True  # Set to False to disable audio endpoints
-ENABLE_IMAGE_ENDPOINTS = True  # Set to False to disable image endpoints
+ENABLE_IMAGE_ENDPOINTS = False  # Set to False to disable image endpoints
 ENABLE_TTS_ENDPOINTS = True    # Set to False to disable TTS endpoints
-ENABLE_EMBEDDING_ENDPOINTS = True  # Set to False to disable embedding endpoints
+ENABLE_EMBEDDING_ENDPOINTS = False  # Set to False to disable embedding endpoints
 
 def log_event(event_type, status, details=None):
     """Logs events such as transcriptions, embeddings, and blendshape generations."""
