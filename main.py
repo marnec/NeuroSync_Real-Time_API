@@ -4,16 +4,14 @@ from flask import Flask, request, jsonify, Response
 from datetime import datetime
 import json
 import traceback
-import time  # For timing endpoints
+import time
 import warnings
 warnings.simplefilter("ignore")
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # choose which GPU to use, 0 is main.
 
 import torch
-
-from neurosync.config import config
-
+from models.neurosync.config import config
 from utils.utils_emb import process_embedding
 from utils.utils_audio import process_transcription, process_blendshapes, generate_speech_segment_tts 
 from utils.utils_image import process_image, process_clip, process_pdf_imagery
