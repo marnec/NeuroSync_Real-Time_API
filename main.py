@@ -14,11 +14,11 @@ import torch
 
 from neurosync.config import config
 
-from utils_emb import process_embedding
-from utils_audio import process_transcription, process_blendshapes, generate_speech_segment_tts 
-from utils_image import process_image, process_clip, process_pdf_imagery
+from utils.utils_emb import process_embedding
+from utils.utils_audio import process_transcription, process_blendshapes, generate_speech_segment_tts 
+from utils.utils_image import process_image, process_clip, process_pdf_imagery
 
-from model_loader import load_audio_models, load_embedding_model, load_image_models, load_tts_model
+from utils.model_loader import load_audio_models, load_embedding_model, load_image_models, load_tts_model
 
 LOG_FILE_PATH = "log"
 os.makedirs(LOG_FILE_PATH, exist_ok=True)
