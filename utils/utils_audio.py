@@ -9,7 +9,7 @@ from base64 import b64decode
 import soundfile as sf
 import resampy
 
-from neurosync.generate_face_shapes import generate_facial_data_from_bytes
+from models.neurosync.generate_face_shapes import generate_facial_data_from_bytes
 
 def trim_and_fade(audio, sample_rate, threshold=0.01, fade_duration=0.05):
     above_threshold = np.where(np.abs(audio) > threshold)[0]
