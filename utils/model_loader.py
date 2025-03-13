@@ -43,7 +43,7 @@ def load_audio_models():
 
 def load_embedding_model():
     from sentence_transformers import SentenceTransformer
-    emb_model_path = "arctic_embed"
+    emb_model_path = "models/arctic_embed"
     embmodel = SentenceTransformer(emb_model_path).to(device)
     return embmodel
 
