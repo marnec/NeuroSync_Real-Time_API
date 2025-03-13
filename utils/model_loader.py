@@ -9,12 +9,12 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 def load_audio_models():
     from transformers import pipeline, AutoModelForSpeechSeq2Seq, AutoProcessor
-    from neurosync.model.model import load_model
-    from neurosync.config import config
+    from models.neurosync.model.model import load_model
+    from models.neurosync.config import config
 
     torch_dtype_audio = torch.bfloat16 if torch.cuda.is_available() else torch.float32
 
-    audio_model_id = 'whisper_turbo'
+    audio_model_id = 'models/whisper_turbo'
     new_model = AutoModelForSpeechSeq2Seq.from_pretrained(
         audio_model_id,
         torch_dtype=torch_dtype_audio,
@@ -33,7 +33,7 @@ def load_audio_models():
     )
 
     # Load the blendshape model
-    model_path = 'neurosync/model/model.pth'
+    model_path = 'models/neurosync/model/model.pth'
     blendshape_model = load_model(model_path, config, device)
 
     return {
@@ -57,15 +57,15 @@ def load_image_models():
         ViltForQuestionAnswering
     )
 
-    blip_path = "vision/blip-image-captioning-large"
+    blip_path = "models/vision/blip-image-captioning-large"
     blip_processor = BlipProcessor.from_pretrained(blip_path)
     blip_model = BlipForConditionalGeneration.from_pretrained(blip_path).to(device)
 
-    clip_path = "vision/clip-vit-large-patch14"
+    clip_path = "models/vision/clip-vit-large-patch14"
     clip_processor = CLIPProcessor.from_pretrained(clip_path)
     clip_model = CLIPModel.from_pretrained(clip_path).to(device)
 
-    vilt_path = "vision/vilt-b32-finetuned-vqa"
+    vilt_path = "models/vision/vilt-b32-finetuned-vqa"
     vilt_processor = ViltProcessor.from_pretrained(vilt_path)
     vilt_model = ViltForQuestionAnswering.from_pretrained(vilt_path).to(device)
 
