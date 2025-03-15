@@ -5,8 +5,8 @@
 
 # import numpy as np
 
-from neurosync.audio.extraction.extract_features import extract_audio_features
-from neurosync.audio.processing.audio_processing import process_audio_features
+from models.neurosync.audio.extraction.extract_features import extract_audio_features
+from models.neurosync.audio.processing.audio_processing import process_audio_features
 
 def generate_facial_data_from_bytes(audio_bytes, model, device, config):
     
