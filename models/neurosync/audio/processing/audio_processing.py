@@ -140,7 +140,7 @@ def zero_columns(data):
     Returns:
         np.ndarray: Modified data with specified columns set to zero.
     """
-    columns_to_zero = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
+    columns_to_zero = [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
     modified_data = np.copy(data)  # Ensure original data is not modified
     modified_data[:, columns_to_zero] = 0
     return modified_data
