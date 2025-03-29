@@ -1,6 +1,6 @@
 # NeuroSync_Real-Time_API
 
-## 29/03/2025 Update to model.pth and model.py
+## 29/03/2025 Update to NeuroSync model.pth and model.py
 
 - Increased accuracy (timing and overall face shows more natural movement overall, brows, squint, cheeks + mouth shapes)
 - More smoothness during playback (flappy mouth be gone in most cases, even when speaking quickly)
