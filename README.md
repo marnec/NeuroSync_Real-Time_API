@@ -9,8 +9,6 @@
 
 [Download the model from Hugging Face](https://huggingface.co/AnimaVR/NEUROSYNC_Audio_To_Face_Blendshape)
 
-These increases in quality come from better data and removal of "global" positional encoding from the model and staying with ropes positional encoding within the MHA block.
-
 # A collection of AI model endpoints you can run locally for a real-time audio2face system.
 
 *Used with [The Player](https://github.com/AnimaVR/NeuroSync_Player), NeuroSync real-time api creates facial blendshape animations that are sent to Unreal Engine via LiveLink from audio or text inputs, locally.*
