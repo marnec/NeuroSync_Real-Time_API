@@ -187,6 +187,7 @@ else:
 # ------------------- TTS API (Port 8000) -------------------
 app_tts = Flask("tts_app")
 
+
 if ENABLE_TTS_ENDPOINTS:
     @app_tts.route('/generate_speech', methods=['POST'])
     @time_endpoint
@@ -194,8 +195,11 @@ if ENABLE_TTS_ENDPOINTS:
         """
         Endpoint for generating speech using the TTS engine.
         """
-        text = request.json.get('text', '')
-        result = generate_speech_segment_tts(text, tts_models["tts_pipeline"], tts_models["tts_lock"])
+        data = request.json
+        text = data.get('text', '')
+        # NEW: Allow the voice to be optionally specified in the request
+        voice = data.get('voice', 'af_heart')
+        result = generate_speech_segment_tts(text, tts_models["tts_pipeline"], tts_models["tts_lock"], voice=voice)
         if result is None:
             print("TTS engine failed to generate audio.")
             return jsonify({"error": "Failed to generate audio with TTS engine"}), 500
@@ -212,7 +216,9 @@ if ENABLE_TTS_ENDPOINTS:
                 log_event("synthesize_and_blendshapes", "failure", "No text data provided.")
                 return jsonify({"status": "error", "message": "No text data provided."}), 400
 
-            audio_bytes = generate_speech_segment_tts(text, tts_models["tts_pipeline"], tts_models["tts_lock"])
+            # NEW: Extract the optional voice parameter from the request
+            voice = data.get("voice", "af_heart")
+            audio_bytes = generate_speech_segment_tts(text, tts_models["tts_pipeline"], tts_models["tts_lock"], voice=voice)
             if audio_bytes is None:
                 log_event("synthesize_and_blendshapes", "failure", "Failed to generate speech with TTS engine.")
                 return jsonify({"status": "error", "message": "Failed to generate speech with TTS engine."}), 500
