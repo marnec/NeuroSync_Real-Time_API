@@ -11,33 +11,48 @@ import resampy
 
 from models.neurosync.generate_face_shapes import generate_facial_data_from_bytes
 
-def trim_and_fade(audio, sample_rate, threshold=0.01, fade_duration=0.05):
+def trim_and_fade(audio, sample_rate, threshold=0.01, fade_duration=0.0, padding_duration=0.1):
+    # Find indices where the absolute value exceeds the threshold (non-silent samples)
     above_threshold = np.where(np.abs(audio) > threshold)[0]
     if above_threshold.size == 0:
         return audio
 
-    start_idx = above_threshold[0]
-    end_idx = above_threshold[-1] + 1  # +1 to include the last sample
+    padding_samples = int(padding_duration * sample_rate)
+    start_idx = max(above_threshold[0] - padding_samples, 0)
+
+    desired_silence_samples = int(0.2 * sample_rate)
+    trailing_start = above_threshold[-1] + 1
+
+    # Count contiguous silent samples after the trailing_start
+    available_silence_samples = 0
+    for i in range(trailing_start, len(audio)):
+        if np.abs(audio[i]) <= threshold:
+            available_silence_samples += 1
+        else:
+            break
+
+    silence_samples_to_include = min(desired_silence_samples, available_silence_samples)
+    end_idx = trailing_start + silence_samples_to_include
+
     trimmed_audio = audio[start_idx:end_idx]
 
-    # Calculate number of samples for the fade.
-    fade_samples = int(fade_duration * sample_rate)
-    fade_samples = min(fade_samples, len(trimmed_audio) // 2)
 
-    fade_in = np.linspace(0, 1, fade_samples)
-    fade_out = np.linspace(1, 0, fade_samples)
-
-    trimmed_audio[:fade_samples] *= fade_in
-    trimmed_audio[-fade_samples:] *= fade_out
+    if fade_duration > 0:
+        fade_samples = int(fade_duration * sample_rate)
+        fade_samples = min(fade_samples, len(trimmed_audio))  # Ensure fade_samples is not longer than the trimmed_audio
+        fade_in = np.linspace(0, 1, fade_samples)
+        trimmed_audio[:fade_samples] *= fade_in
 
     return trimmed_audio
 
-def generate_speech_segment_tts(text, tts_pipeline, tts_lock):
+
+def generate_speech_segment_tts(text, tts_pipeline, tts_lock, voice='bf_isabella'):
     """
     Generate a speech segment using the provided TTS pipeline and lock.
     :param text: The input text to synthesize.
     :param tts_pipeline: The TTS pipeline (e.g., Kokoro) loaded from model_loader.
     :param tts_lock: A threading lock to ensure thread safety.
+    :param voice: The voice identifier to use for synthesis (default is 'bf_isabella').
     :return: The synthesized audio as bytes (WAV format) or None on failure.
     """
     try:
@@ -48,14 +63,12 @@ def generate_speech_segment_tts(text, tts_pipeline, tts_lock):
         with tts_lock:
             generator = tts_pipeline(
                 text, 
-                voice='af_bella',  # Change voice here if needed
-                speed=0.8, 
+                voice=voice,  # Voice is now passed via function parameter
+                speed=0.85, 
                 split_pattern=r'\n+'
             )
             audio_segments = []
             for i, (gs, ps, audio) in enumerate(generator):
-                # Uncomment below for debug info:
-                # print(f"TTS segment {i}: graphemes: {gs}, phonemes: {ps}")
                 audio_segments.append(audio)
 
             if not audio_segments:
@@ -64,7 +77,7 @@ def generate_speech_segment_tts(text, tts_pipeline, tts_lock):
 
             full_audio = np.concatenate(audio_segments)
             # Trim silence and apply fade-in/out
-            full_audio = trim_and_fade(full_audio, sample_rate=24000, threshold=0.01, fade_duration=0.05)
+            full_audio = trim_and_fade(full_audio, sample_rate=24000, threshold=0.01, fade_duration=0.02)
 
             # Write the full audio into a buffer as WAV
             buffer = BytesIO()
