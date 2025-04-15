@@ -1,13 +1,6 @@
 # NeuroSync_Real-Time_API
 
-## 29/03/2025 Update to NeuroSync model.pth and model.py
-
-- Increased accuracy (timing and overall face shows more natural movement overall, brows, squint, cheeks + mouth shapes)
-- More smoothness during playback (flappy mouth be gone in most cases, even when speaking quickly)
-- Works better with more voices and styles of speaking.
-- This preview of the new model is a modest increase in capability that requires both model.pth and model.py to be replaced with the new versions.
-
-[Download the model from Hugging Face](https://huggingface.co/AnimaVR/NEUROSYNC_Audio_To_Face_Blendshape)
+[Download the NEUROSYNC model from Hugging Face](https://huggingface.co/AnimaVR/NEUROSYNC_Audio_To_Face_Blendshape)
 
 # A collection of AI model endpoints you can run locally for a real-time audio2face system.
 
